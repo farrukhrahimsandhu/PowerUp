@@ -1,0 +1,9 @@
+{
+  "name": "backupbuddy-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BackupBuddy AI - Home Battery Runtime & Outage Planning Tool",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

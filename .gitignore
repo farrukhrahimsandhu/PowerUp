@@ -1,0 +1,7 @@
+# Secrets and environment configurations
+.env
+!.env.example
+
+# Dependencies
+node_modules/
+node_modules

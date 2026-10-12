@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PowerUp — Solar & Battery Energy Dashboard</title>
+  <meta name="description"
+    content="Plan backup power, manage household appliance loads, and estimate battery recharge times with an intelligent solar energy dashboard.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap"
+    rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+
+  <!-- Top Navigation Bar -->
+  <header class="dashboard-header">
+    <div class="header-container">
+      <div class="brand-group">
+        <div class="brand-icon-wrap" aria-hidden="true">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title-row">
+            <h1 class="brand-title">PowerUp</h1>
+            <span class="badge-pro">Solar &amp; UPS</span>
+          </div>
+          <p class="brand-subtitle">Smart Load Planning &amp; Battery Resilience Dashboard</p>
+        </div>
+      </div>
+
+      <!-- Quick Section Anchor Navigation -->
+      <nav class="nav-links" aria-label="Dashboard Sections">
+        <a href="#overview-section" class="nav-link active">Overview</a>
+        <a href="#step-2" class="nav-link">Appliances</a>
+        <a href="#step-3" class="nav-link">Smart Plan</a>
+        <a href="#recharge-planner" class="nav-link">Recharge</a>
+        <a href="#step-1" class="nav-link">Battery Bank</a>
+      </nav>
+
+      <!-- Status Pills -->
+      <div class="header-status-group">
+        <div class="status-pill live-pill">
+          <span class="pulse-dot"></span>
+          <span class="status-pill-text">Calculations Live</span>
+        </div>
+        <div class="status-pill inverter-pill">
+          <span class="inverter-pill-icon">⚡</span>
+          <span class="status-pill-text">Limit: <strong id="nav-inverter-limit">1000 W</strong></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-shell">
+
+    <!-- Global Alert Banners -->
+    <div id="warning-banner" class="banner banner-warning hidden" role="alert"></div>
+    <div id="status-banner" class="banner banner-error hidden" role="alert"></div>
+
+    <!-- Section 1: KPI Summary Metric Cards -->
+    <section class="kpi-section" id="overview-section" aria-label="Key Performance Indicators">
+
+      <!-- KPI 1: Active Household Load -->
+      <div class="kpi-card card-load">
+        <div class="kpi-icon-wrap icon-teal" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <div class="kpi-header-row">
+            <span class="kpi-label">Current Household Load</span>
+            <span class="kpi-tag" id="kpi-load-percent">21.3% of Limit</span>
+          </div>
+          <div class="kpi-value-row">
+            <span id="active-load-display" class="kpi-number">213 W</span>
+          </div>
+          <span class="kpi-subtext">Sum of active appliances</span>
+        </div>
+      </div>
+
+      <!-- KPI 2: Estimated Backup Time (Hero Highlight Card) -->
+      <div class="kpi-card card-runtime hero-kpi">
+        <div class="kpi-icon-wrap icon-emerald" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <div class="kpi-header-row">
+            <span class="kpi-label">Estimated Backup Time</span>
+            <span class="kpi-tag hero-tag">Safe DoD Cutoff</span>
+          </div>
+          <div class="kpi-value-row">
+            <span id="runtime-formatted" class="kpi-number hero-number">4h 47m</span>
+            <span id="runtime-decimal" class="kpi-sub-runtime">(~4.79 hours)</span>
+          </div>
+          <span class="kpi-subtext">Based on battery capacity &amp; inverter efficiency</span>
+        </div>
+      </div>
+
+      <!-- KPI 3: Target Backup Time Goal -->
+      <div class="kpi-card card-target">
+        <div class="kpi-icon-wrap icon-cyan" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="6"></circle>
+            <circle cx="12" cy="12" r="2"></circle>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <div class="kpi-header-row">
+            <span class="kpi-label">Backup Time You Want</span>
+            <span class="kpi-tag" id="kpi-target-diff">Target Goal</span>
+          </div>
+          <div class="kpi-value-row">
+            <span id="target-display" class="kpi-number">6.0 hrs</span>
+          </div>
+          <span class="kpi-subtext">Planned load-shedding duration</span>
+        </div>
+      </div>
+
+      <!-- KPI 4: Battery Bank Specifications -->
+      <div class="kpi-card card-battery">
+        <div class="kpi-icon-wrap icon-amber" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect x="1" y="6" width="18" height="12" rx="2"></rect>
+            <line x1="23" y1="10" x2="23" y2="14"></line>
+            <line x1="6" y1="10" x2="6" y2="14"></line>
+            <line x1="10" y1="10" x2="10" y2="14"></line>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <div class="kpi-header-row">
+            <span class="kpi-label">Configured Battery Bank</span>
+            <span class="kpi-tag" id="kpi-battery-type-tag">Tubular / Lead-Acid</span>
+          </div>
+          <div class="kpi-value-row">
+            <span id="kpi-battery-specs" class="kpi-number">12V 200Ah</span>
+          </div>
+          <span id="kpi-usable-energy" class="kpi-subtext">~1,020 Wh usable AC energy</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Data-Driven Visualizations Card -->
+    <section class="analytics-card" aria-label="Energy Telemetry Visualizations">
+      <div class="analytics-header">
+        <div class="analytics-title-group">
+          <h2 class="section-title">📊 Live Energy &amp; Load Telemetry</h2>
+          <p class="section-desc">Grounded strictly in your live appliance configuration and inverter electrical limits.
+          </p>
+        </div>
+        <div class="badge-pill teal-subtle">Real-Time Derived Data</div>
+      </div>
+
+      <div class="analytics-grid">
+        <!-- Visual 1: Inverter Continuous Capacity Gauge -->
+        <div class="metric-meter-box">
+          <div class="meter-header">
+            <span class="meter-title">Inverter Load Utilization</span>
+            <span id="meter-inverter-val" class="meter-val-badge">213 W / 1000 W (21%)</span>
+          </div>
+          <div class="meter-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="21">
+            <div id="meter-inverter-fill" class="meter-fill meter-teal" style="width: 21.3%;"></div>
+          </div>
+          <div class="meter-footer">
+            <span>0 W (Idle)</span>
+            <span id="meter-inverter-headroom">Headroom: 787 W remaining</span>
+            <span>1000 W Limit</span>
+          </div>
+        </div>
+
+        <!-- Visual 2: Runtime Achieved vs Target Goal -->
+        <div class="metric-meter-box">
+          <div class="meter-header">
+            <span class="meter-title">Runtime vs. Target Goal</span>
+            <span id="meter-runtime-val" class="meter-val-badge">4.8h / 6.0h (80%)</span>
+          </div>
+          <div class="meter-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80">
+            <div id="meter-runtime-fill" class="meter-fill meter-amber" style="width: 79.8%;"></div>
+          </div>
+          <div class="meter-footer">
+            <span>0 hrs</span>
+            <span id="meter-runtime-status">Deficit: 1h 13m short</span>
+            <span>Target: 6.0 hrs</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual 3: Real Category Power Breakdown Track -->
+      <div class="category-breakdown-box">
+        <div class="category-breakdown-header">
+          <span class="meter-title">Active Load Breakdown by Category</span>
+          <span id="category-breakdown-summary" class="breakdown-total">Total: 213 Watts</span>
+        </div>
+        <div class="segmented-track" id="category-segmented-bar" aria-label="Category load distribution">
+          <div id="seg-essentials" class="segment seg-essentials" style="width: 100%;" title="Basic Essentials: 213W">
+          </div>
+          <div id="seg-cooling" class="segment seg-cooling" style="width: 0%;" title="Cooling: 0W"></div>
+          <div id="seg-kitchen" class="segment seg-kitchen" style="width: 0%;" title="Home and Kitchen: 0W"></div>
+          <div id="seg-work" class="segment seg-work" style="width: 0%;" title="Work and Other Devices: 0W"></div>
+        </div>
+        <div class="segment-legend">
+          <div class="legend-item"><span class="legend-dot dot-essentials"></span> Essentials: <strong
+              id="leg-essentials-val">213 W</strong></div>
+          <div class="legend-item"><span class="legend-dot dot-cooling"></span> Cooling: <strong id="leg-cooling-val">0
+              W</strong></div>
+          <div class="legend-item"><span class="legend-dot dot-kitchen"></span> Kitchen: <strong id="leg-kitchen-val">0
+              W</strong></div>
+          <div class="legend-item"><span class="legend-dot dot-work"></span> Work &amp; Other: <strong
+              id="leg-work-val">0 W</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Responsive Two-Column Dashboard Layout -->
+    <main class="dashboard-main-grid">
+
+      <!-- LEFT / PRIMARY WORKSPACE COLUMN (Appliances, Smart Plan, AI Advisor) -->
+      <div class="dashboard-col-primary">
+
+        <!-- STEP 2: Choose Appliances -->
+        <section class="dash-card" id="step-2" aria-labelledby="step2-title">
+          <div class="dash-card-header">
+            <div class="step-badge">2</div>
+            <div class="dash-card-header-text">
+              <h2 id="step2-title" class="card-main-title">Household Appliances Catalog</h2>
+              <p class="card-subtitle">Adjust quantities (+/−) and customize estimated wattages. Toggle priority to keep
+                essentials on.</p>
+            </div>
+          </div>
+
+          <!-- Starting Surge Safety Notice -->
+          <div class="surge-notice" role="note">
+            <div class="surge-icon">⚡</div>
+            <div class="surge-text">
+              <strong>Motor &amp; Compressor Surge Warning:</strong> Air conditioners, refrigerators, and water pumps
+              draw <strong>2× to 4× higher surge power</strong> when their compressors kick on. Ensure total surge does
+              not exceed your inverter peak capacity.
+            </div>
+          </div>
+
+          <!-- Appliance Categories Container (Populated dynamically by calculator.js) -->
+          <div id="appliances-container" class="appliance-catalog">
+            <!-- Dynamically populated categories and cards -->
+          </div>
+
+          <!-- Optional Custom Load Override for Advanced Users -->
+          <details class="advanced-details" style="margin-top: 1.25rem;">
+            <summary>Custom Total Load Override (Advanced)</summary>
+            <div class="advanced-body">
+              <label class="custom-toggle-label">
+                <input type="checkbox" id="custom-load-toggle"> Override catalog list with a manual total wattage
+              </label>
+              <div id="custom-load-container" class="form-group hidden" style="margin-top: 0.75rem;">
+                <label for="custom-load-input">Manual Total Wattage (Watts)</label>
+                <input type="number" id="custom-load-input" class="form-control" value="213" min="0" step="1">
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <!-- STEP 3: View Backup Plan -->
+        <section class="dash-card" id="step-3" aria-labelledby="step3-title">
+          <div class="dash-card-header">
+            <div class="step-badge">3</div>
+            <div class="dash-card-header-text">
+              <h2 id="step3-title" class="card-main-title">Smart Load Shedding Plan</h2>
+              <p class="card-subtitle">Algorithmic load reduction recommendations to help your battery achieve your
+                target backup duration.</p>
+            </div>
+          </div>
+
+          <div id="planner-result-box" class="plan-card-body">
+            <!-- Dynamically populated recommendations and summaries -->
+          </div>
+
+          <!-- AI Power Advisor Section -->
+          <div class="ai-advisor-section" id="ai-advisor-section" aria-labelledby="ai-advisor-title">
+            <div class="ai-advisor-header">
+              <div class="ai-advisor-brand">
+                <div class="ai-spark-icon">✨</div>
+                <div>
+                  <h3 id="ai-advisor-title" class="ai-title">AI Power Advisor</h3>
+                  <p class="ai-desc">Personalized load-shedding guidance generated with Google Gemini, grounded in your
+                    live calculations.</p>
+                </div>
+              </div>
+              <button type="button" id="btn-generate-ai" class="btn-generate-ai">
+                ✨ Generate AI Power Plan
+              </button>
+            </div>
+
+            <div id="ai-advisor-output" class="ai-output-box hidden" aria-live="polite">
+              <!-- Loading state, generated advice, or actionable error -->
+            </div>
+          </div>
+
+          <div class="disclaimer-box">
+            <strong>Planning Notice:</strong> Runtime estimates use nominal battery voltage, safe discharge limits, and
+            typical inverter conversion losses. Actual backup time may vary with ambient room temperature, battery
+            aging, and non-linear discharge rates.
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT / SIDEBAR COLUMN (Battery Settings, Recharge Planner, Technical Specs) -->
+      <aside class="dashboard-col-sidebar">
+
+        <!-- STEP 1: Battery Bank & Inverter Settings -->
+        <section class="dash-card sidebar-card" id="step-1" aria-labelledby="step1-title">
+          <div class="dash-card-header">
+            <div class="step-badge step-badge-teal">1</div>
+            <div class="dash-card-header-text">
+              <h2 id="step1-title" class="card-main-title">Battery &amp; Inverter Setup</h2>
+              <p class="card-subtitle">Set your electrical battery bank specifications.</p>
+            </div>
+          </div>
+
+          <div class="step-body form-stack">
+            <div class="form-group">
+              <label for="battery-voltage">Battery Bank Voltage</label>
+              <select id="battery-voltage" class="form-control">
+                <option value="12" selected>12 V (Single 12V battery)</option>
+                <option value="24">24 V (Two 12V batteries in series)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="battery-capacity">Battery Size / Capacity (Ah)</label>
+              <input type="number" id="battery-capacity" class="form-control" value="200" min="1" step="1">
+              <div class="input-hint">Common: 150 Ah, 180 Ah, 200 Ah, 230 Ah</div>
+            </div>
+
+            <div class="form-group">
+              <label for="battery-type">Battery Chemistry / Type</label>
+              <select id="battery-type" class="form-control">
+                <option value="lead-acid" selected>Tubular / Lead-Acid (Standard)</option>
+                <option value="lithium">Lithium (LiFePO4)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="inverter-rating">Inverter Power Limit (Continuous Watts)</label>
+              <input type="number" id="inverter-rating" class="form-control" value="1000" min="1" step="50">
+              <div class="input-hint">Continuous limit (e.g. 1000 W / 1.2 kVA)</div>
+            </div>
+
+            <div class="form-group">
+              <label for="target-hours">Desired Backup Duration (Hours)</label>
+              <input type="number" id="target-hours" class="form-control" value="6" min="0.5" max="48" step="0.5">
+              <div class="input-hint">Planned load-shedding duration (e.g. 4 to 8 hrs)</div>
+            </div>
+
+            <!-- Advanced Technical Settings (Collapsible) -->
+            <details class="advanced-details">
+              <summary>Advanced Calibration (DoD &amp; Efficiency)</summary>
+              <div class="advanced-body form-stack">
+                <div class="form-group">
+                  <label for="usable-discharge">Safe Discharge Limit (%)</label>
+                  <input type="number" id="usable-discharge" class="form-control" value="50" min="1" max="100">
+                  <div class="input-hint">50% for Lead-Acid, 80% for Lithium</div>
+                </div>
+                <div class="form-group">
+                  <label for="inverter-efficiency">Inverter Efficiency (%)</label>
+                  <input type="number" id="inverter-efficiency" class="form-control" value="85" min="1" max="100">
+                  <div class="input-hint">Typically 80% to 90% (85% standard)</div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- OPTIONAL RECHARGE PLANNER -->
+        <section class="dash-card sidebar-card recharge-planner-card" id="recharge-planner"
+          aria-labelledby="recharge-title">
+          <div class="dash-card-header">
+            <div class="step-badge step-badge-solar">⚡</div>
+            <div class="dash-card-header-text">
+              <div class="header-with-badge">
+                <h2 id="recharge-title" class="card-main-title">Recharge Planner</h2>
+                <span class="badge-optional">Optional</span>
+              </div>
+              <p class="card-subtitle">Calculate recovery time from Grid or Solar Panels.</p>
+            </div>
+          </div>
+
+          <div class="recharge-content-stack">
+            <!-- SOC Inputs -->
+            <div class="soc-grid">
+              <div class="form-group">
+                <label for="recharge-current-soc">Current Charge (%)</label>
+                <input type="number" id="recharge-current-soc" class="form-control" value="50" min="0" max="99"
+                  step="5">
+                <div class="input-hint">Remaining battery %</div>
+              </div>
+
+              <div class="form-group">
+                <label for="recharge-target-soc">Target Charge (%)</label>
+                <input type="number" id="recharge-target-soc" class="form-control" value="100" min="1" max="100"
+                  step="5">
+                <div class="input-hint">Desired target level</div>
+              </div>
+            </div>
+
+            <!-- Charging Method Selection -->
+            <div class="form-group" style="margin-top: 0.25rem;">
+              <label>Charging Source</label>
+              <div class="method-toggle-group">
+                <label class="method-option">
+                  <input type="radio" name="charge-method" value="grid" checked>
+                  <span class="method-label-pill">🔌 Grid / UPS Charger</span>
+                </label>
+                <label class="method-option">
+                  <input type="radio" name="charge-method" value="solar">
+                  <span class="method-label-pill">☀️ Solar Panels</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Grid Specific Inputs -->
+            <div id="grid-inputs-panel" class="method-panel">
+              <div class="form-group">
+                <label for="grid-charge-current">Charger Rated Current (Amperes)</label>
+                <input type="number" id="grid-charge-current" class="form-control" value="20" min="1" max="150"
+                  step="1">
+                <div class="input-hint">Typical UPS charges at 15 A – 25 A</div>
+              </div>
+            </div>
+
+            <!-- Solar Specific Inputs -->
+            <div id="solar-inputs-panel" class="method-panel hidden">
+              <div class="form-group">
+                <label for="solar-total-watts">Total Solar Panels Rating (Watts)</label>
+                <input type="number" id="solar-total-watts" class="form-control" value="600" min="50" step="50">
+                <div class="input-hint">Combined capacity (e.g. 2× 300W)</div>
+              </div>
+
+              <div class="form-group">
+                <label for="solar-condition">Sunlight Conditions (Assumption)</label>
+                <select id="solar-condition" class="form-control">
+                  <option value="0.8" selected>Strong Sun (approx. 80% output)</option>
+                  <option value="0.5">Moderate / Hazy (approx. 50% output)</option>
+                  <option value="0.25">Overcast / Low (approx. 25% output)</option>
+                </select>
+                <div class="input-hint">Planning assumption, not weather feed</div>
+              </div>
+
+              <div class="form-group">
+                <label class="custom-toggle-label">
+                  <input type="checkbox" id="solar-deduct-load" checked>
+                  <span>Power active appliances while charging</span>
+                </label>
+                <div class="input-hint">Solar covers active loads before charging battery</div>
+              </div>
+            </div>
+
+            <!-- Recharge Results Display -->
+            <div class="recharge-badge-card">
+              <div class="recharge-badge-label">Estimated Charging Time</div>
+              <div id="recharge-time-display" class="recharge-badge-time">--</div>
+              <div id="recharge-time-subtext" class="recharge-badge-sub">--</div>
+            </div>
+
+            <div id="recharge-details-box" class="recharge-details-box"></div>
+            <div id="recharge-warning-box" class="recharge-warning-box hidden"></div>
+
+            <div class="recharge-safety-footer">
+              <strong>Bank Info:</strong> Energy calculated for configured battery (<span id="recharge-bank-summary">12V
+                200Ah</span>). Times assume bulk constant current; absorption above 85% takes longer.
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Energy Efficiency Tips Card -->
+        <section class="dash-card sidebar-card tips-card">
+          <div class="tips-header">
+            <span class="tips-icon">💡</span>
+            <h3 class="tips-title">Quick Energy Wisdom</h3>
+          </div>
+          <ul class="tips-list">
+            <li><strong>Ceiling Fans:</strong> AC fans use ~75W; BLDC inverter fans consume only ~30W (saving 60%
+              battery energy).</li>
+            <li><strong>Inverter ACs:</strong> Once the room cools down, an inverter AC stabilizes between 400W–600W
+              rather than maximum rated draw.</li>
+            <li><strong>Lithium vs Tubular:</strong> Tubular lead-acid batteries should only be drained to 50% DoD to
+              preserve 3–5 year lifespan.</li>
+          </ul>
+        </section>
+      </aside>
+    </main>
+
+    <!-- Polished Dashboard Footer -->
+    <footer class="dashboard-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <strong>PowerUp</strong> &bull; Solar &amp; UPS Load-Shedding Resilience System
+        </div>
+        <div class="footer-right">
+          <span>Vanilla Architecture &bull; 19 Appliances Catalog &bull; Dual-Mode Recharge</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="calculator.js"></script>
+</body>
+
+</html>
